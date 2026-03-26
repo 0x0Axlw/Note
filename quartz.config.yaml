@@ -7,7 +7,7 @@ configuration:
   analytics:
     provider: plausible
   locale: en-US
-  baseUrl: 0x0axlw.github.io
+  baseUrl: 0x0axlw.github.io/Note
   ignorePatterns:
     - private
     - templates

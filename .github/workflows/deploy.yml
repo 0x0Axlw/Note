@@ -1,26 +1,30 @@
-name: Deploy v5 Preview
+name: Deploy Quartz Site
 
 on:
   push:
     branches:
-      - main   # 🔥 change from v5 → main
+      - main
   workflow_dispatch:
 
 env:
-  THEME_NAME: arzaba   # 🔥 THEME ADDED
+  THEME_NAME: arzaba
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    name: Deploy Quartz to GitHub Pages
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -29,17 +33,12 @@ jobs:
         with:
           node-version: 22
 
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      - name: Install dependencies
+        run: npm ci
 
-      - run: npm ci
-
-      # 🔥 THEME INSTALL (THIS IS WHAT YOU WANTED)
-      - name: Fetch Quartz Theme
-        run: curl -s -S https://raw.githubusercontent.com/saberzero1/quartz-themes/master/action.sh | bash -s -- $arzaba
+      # 🔥 APPLY ARZABA THEME
+      - name: Apply Arzaba Theme
+        run: curl -s -S https://raw.githubusercontent.com/saberzero1/quartz-themes/master/action.sh | bash -s -- $THEME_NAME
 
       - name: Install Quartz plugins
         run: npx quartz plugin install
@@ -52,5 +51,10 @@ jobs:
         with:
           path: public
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4

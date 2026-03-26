@@ -40,8 +40,8 @@ jobs:
       - name: Apply Arzaba Theme
         run: curl -s -S https://raw.githubusercontent.com/saberzero1/quartz-themes/master/action.sh | bash -s -- $THEME_NAME
 
-      - name: Install Quartz plugins
-        run: npx quartz plugin install
+      - name: Restore Quartz plugins
+        run: npx quartz plugin restore
 
       - name: Build Quartz
         run: npx quartz build
@@ -53,8 +53,12 @@ jobs:
 
   deploy:
     needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
